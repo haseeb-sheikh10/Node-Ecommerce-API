@@ -1,10 +1,22 @@
-const Category = require("../models/category");
+const { Category } = require("../models/category");
 const { Product, validate } = require("../models/product");
 const ProductCategoryRelation = require("../models/product-category");
 
 const GetProducts = async (req, res) => {
   try {
-    const products = await Product.find();
+    let products = await Product.find().lean();
+    const productWithCategory = await ProductCategoryRelation.find();
+    for (let i = 0; i < products.length; i++) {
+      const categoryIds = productWithCategory
+        .filter(
+          (product) =>
+            product.product_id.toString() == products[i]._id.toString()
+        )
+        .map((product) => product.category_id);
+
+      const categories = await Category.find({ _id: { $in: categoryIds } });
+      products[i].categories = categories;
+    }
     if (products.length === 0) {
       return res.status(404).json({
         status: false,
@@ -26,7 +38,16 @@ const GetProducts = async (req, res) => {
 
 const GetProductsById = async (req, res) => {
   try {
-    const product = await Product.findById(req.params.id);
+    let product = await Product.findById(req.params.id).lean();
+    const productWithCategory = await ProductCategoryRelation.find();
+    const categoryIds = productWithCategory
+      .filter((p) => p.product_id.toString() == product._id.toString())
+      .map((p) => p.category_id);
+
+    console.log(categoryIds);
+    const categories = await Category.find({ _id: { $in: categoryIds } });
+    product.categories = categories;
+
     if (product) {
       return res.json({
         status: true,
@@ -50,7 +71,18 @@ const GetProductsByCategory = async (req, res) => {
       category_id: req.params.category_id,
     });
     const productIds = productWithCategory.map((product) => product.product_id);
-    const products = await Product.find({ _id: { $in: productIds } });
+    let products = await Product.find({ _id: { $in: productIds } }).lean();
+    for (let i = 0; i < products.length; i++) {
+      const categoryIds = productWithCategory
+        .filter(
+          (product) =>
+            product.product_id.toString() == products[i]._id.toString()
+        )
+        .map((product) => product.category_id);
+
+      const categories = await Category.find({ _id: { $in: categoryIds } });
+      products[i].categories = categories;
+    }
     if (products.length === 0) {
       return res.status(404).json({
         status: false,
@@ -208,6 +240,109 @@ const DeleteProducts = async (req, res) => {
   }
 };
 
+const GetFeaturedProducts = async (req, res) => {
+  try {
+    let products = await Product.find({ is_featured: true }).lean();
+    const productWithCategory = await ProductCategoryRelation.find();
+    for (let i = 0; i < products.length; i++) {
+      const categoryIds = productWithCategory
+        .filter(
+          (product) =>
+            product.product_id.toString() == products[i]._id.toString()
+        )
+        .map((product) => product.category_id);
+
+      const categories = await Category.find({ _id: { $in: categoryIds } });
+      products[i].categories = categories;
+    }
+    if (products.length === 0) {
+      return res.status(404).json({
+        status: false,
+        message: "No records found",
+        total: products.length,
+        data: products,
+      });
+    }
+    return res.json({
+      status: true,
+      message: "records found",
+      total: products.length,
+      data: products,
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+const GetNewArrivalProducts = async (req, res) => {
+  try {
+    let products = await Product.find({ is_new_arrival: true }).lean();
+    const productWithCategory = await ProductCategoryRelation.find();
+    for (let i = 0; i < products.length; i++) {
+      const categoryIds = productWithCategory
+        .filter(
+          (product) =>
+            product.product_id.toString() == products[i]._id.toString()
+        )
+        .map((product) => product.category_id);
+
+      const categories = await Category.find({ _id: { $in: categoryIds } });
+      products[i].categories = categories;
+    }
+    if (products.length === 0) {
+      return res.status(404).json({
+        status: false,
+        message: "No records found",
+        total: products.length,
+        data: products,
+      });
+    }
+    GetFeaturedProducts;
+    return res.json({
+      status: true,
+      message: "records found",
+      total: products.length,
+      data: products,
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+const GetBestSellerProducts = async (req, res) => {
+  try {
+    let products = await Product.find({ is_best_seller: true }).lean();
+    const productWithCategory = await ProductCategoryRelation.find();
+    for (let i = 0; i < products.length; i++) {
+      const categoryIds = productWithCategory
+        .filter(
+          (product) =>
+            product.product_id.toString() == products[i]._id.toString()
+        )
+        .map((product) => product.category_id);
+
+      const categories = await Category.find({ _id: { $in: categoryIds } });
+      products[i].categories = categories;
+    }
+    if (products.length === 0) {
+      return res.status(404).json({
+        status: false,
+        message: "No records found",
+        total: products.length,
+        data: products,
+      });
+    }
+    return res.json({
+      status: true,
+      message: "records found",
+      total: products.length,
+      data: products,
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
 module.exports = {
   GetProducts,
   GetProductsById,
@@ -215,4 +350,7 @@ module.exports = {
   AddProducts,
   UpdateProducts,
   DeleteProducts,
+  GetFeaturedProducts,
+  GetNewArrivalProducts,
+  GetBestSellerProducts,
 };

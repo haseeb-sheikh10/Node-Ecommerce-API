@@ -1,4 +1,4 @@
-require("dotenv").config();
+process.loadEnvFile();
 const express = require("express");
 const connect = require("./db");
 const cors = require("cors");
@@ -21,6 +21,8 @@ app.use(cors());
 // Routes
 app.use("/api/auth", require("./routes/auth"));
 app.use("/api/product", require("./routes/product"));
+app.use("/api/categories", require("./routes/category"));
+app.use("/api/comment", require("./routes/comment"));
 
 // Start the server
 app.listen(port, () => {
