@@ -4,6 +4,7 @@ const { User, validate } = require("../models/user");
 const Joi = require("joi");
 const UserToken = require("../models/user-token");
 const sendEmail = require("../utils/sendEmail");
+const { SyncCarts } = require("../utils/SyncCarts");
 
 const Login = async (req, res) => {
   try {
@@ -54,6 +55,8 @@ const Login = async (req, res) => {
     });
     await userToken.save();
 
+    await SyncCarts(user, req.query.cart_id, true);
+
     res.json({
       status: true,
       message: "User logged in successfully",
@@ -100,6 +103,8 @@ const Register = async (req, res) => {
     });
     await userToken.save();
 
+    await SyncCarts(user, req.query.cart_id, true);
+
     res.json({
       status: true,
       message: "User registered successfully",
@@ -124,6 +129,8 @@ const Logout = async (req, res) => {
     }
 
     await userToken.deleteOne({ user_id: req.user._id });
+
+    await SyncCarts(req.user, req.query.cart_id, false);
 
     res.json({ status: true, message: "User logged out successfully" });
   } catch (error) {

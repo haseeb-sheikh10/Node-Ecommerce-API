@@ -23,6 +23,8 @@ app.use("/api/auth", require("./routes/auth"));
 app.use("/api/product", require("./routes/product"));
 app.use("/api/categories", require("./routes/category"));
 app.use("/api/comment", require("./routes/comment"));
+app.use("/api/cart", require("./routes/cart"));
+app.use("/api/annonymous-cart", require("./routes/annonymous-cart"));
 
 // Start the server
 app.listen(port, () => {

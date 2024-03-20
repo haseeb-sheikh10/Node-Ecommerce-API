@@ -1,13 +1,7 @@
 const Joi = require("joi");
 const mongoose = require("mongoose");
 
-const cartSchema = new mongoose.Schema({
-  user_id: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "User",
-    required: true,
-    unique: true,
-  },
+const annonymousCartSchema = new mongoose.Schema({
   items: [
     {
       product_id: {
@@ -18,7 +12,6 @@ const cartSchema = new mongoose.Schema({
       quantity: {
         type: Number,
         required: true,
-        default: 1,
       },
     },
   ],
@@ -30,12 +23,12 @@ const cartSchema = new mongoose.Schema({
 
 const validate = (cart) => {
   const schema = Joi.object({
-    user_id: Joi.string().required(),
+    cart_id: Joi.string().required(),
     product_id: Joi.string().required(),
     quantity: Joi.number().required(),
   });
   return schema.validate(cart);
 };
 
-const Cart = mongoose.model("Cart", cartSchema);
-module.exports = { Cart, validate };
+const AnnonymousCart = mongoose.model("AnnonymousCart", annonymousCartSchema);
+module.exports = { AnnonymousCart, validate };
