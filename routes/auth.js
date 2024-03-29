@@ -5,13 +5,13 @@ const {
   ForgotPassword,
   ResetPassword,
 } = require("../controllers/auth");
-const authenticate = require("../middlewares/authenticate");
+const Authenticate = require("../middlewares/Authenticate");
 
 const router = require("express").Router();
 
 router.post("/login", Login);
 router.post("/register", Register);
-router.post("/logout", authenticate, Logout);
+router.post("/logout", Authenticate, Logout);
 router.post("/forgot-password", ForgotPassword);
 router.post("/reset-password/:user_id/:token", ResetPassword);
 

@@ -9,7 +9,12 @@ const {
   GetNewArrivalProducts,
   GetBestSellerProducts,
 } = require("../controllers/product");
-const authenticate = require("../middlewares/authenticate");
+const Authenticate = require("../middlewares/Authenticate");
+const {
+  CheckEditRights,
+  CheckAddRights,
+  CheckDeleteRights,
+} = require("../middlewares/CheckRights");
 
 const router = require("express").Router();
 
@@ -19,8 +24,8 @@ router.get("/category/:category_id", GetProductsByCategory);
 router.get("/featured", GetFeaturedProducts);
 router.get("/new-arrival", GetNewArrivalProducts);
 router.get("/best-seller", GetBestSellerProducts);
-router.post("/", authenticate, AddProducts);
-router.put("/:id", authenticate, UpdateProducts);
-router.delete("/:id", authenticate, DeleteProducts);
+router.post("/", Authenticate, CheckAddRights, AddProducts);
+router.put("/:id", Authenticate, CheckEditRights, UpdateProducts);
+router.delete("/:id", Authenticate, CheckDeleteRights, DeleteProducts);
 
 module.exports = router;

@@ -2,7 +2,7 @@ const jwt = require("jsonwebtoken");
 const { User } = require("../models/user");
 const UserToken = require("../models/user-token");
 
-const authenticate = async (req, res, next) => {
+const Authenticate = async (req, res, next) => {
   try {
     let token = req.header("Authorization");
     if (!token) {
@@ -34,4 +34,4 @@ const authenticate = async (req, res, next) => {
   }
 };
 
-module.exports = authenticate;
+module.exports = Authenticate;

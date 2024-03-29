@@ -6,6 +6,8 @@ const orderSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: "User",
     required: false,
+    nullable: true,
+    default: null,
   },
   email: {
     type: String,
@@ -35,6 +37,8 @@ const orderSchema = new mongoose.Schema({
     appartement: {
       type: String,
       required: false,
+      default: null,
+      nullable: true,
     },
     address: {
       type: String,
@@ -49,64 +53,86 @@ const orderSchema = new mongoose.Schema({
     first_name: {
       type: String,
       required: false,
+      nullable: true,
     },
     last_name: {
       type: String,
       required: false,
+      nullable: true,
     },
     phone: {
       type: String,
       required: false,
+      nullable: true,
     },
     country: {
       type: String,
       required: false,
+      nullable: true,
     },
     city: {
       type: String,
       required: false,
+      nullable: true,
     },
     appartement: {
       type: String,
       required: false,
+      nullable: true,
     },
     address: {
       type: String,
       required: false,
+      nullable: true,
     },
     zip: {
       type: String,
       required: false,
+      nullable: true,
     },
   },
   shipping_billing_same_address: {
     type: Boolean,
     default: true,
+    required: true,
   },
   shipping_method: {
     type: String,
     required: true,
+    enum: ["standard", "express"],
   },
   payment_method: {
     type: String,
     required: true,
+    enum: ["cod", "card", "paypal", "bank transfer", "stripe"],
   },
   coupon_code: {
     type: String,
     required: false,
+    nullable: true,
+    default: null,
   },
   coupon_discount: {
     type: Number,
     required: false,
+    default: 0,
   },
   payment_status: {
     type: String,
     enum: ["pending", "paid", "failed"],
     default: "pending",
   },
-  shipping_status: {
+  order_status: {
     type: String,
-    enum: ["pending", "processing", "shipped", "delivered"],
+    enum: [
+      "pending",
+      "processing",
+      "shipped",
+      "delivered",
+      "cancelled",
+      "returned",
+      "refunded",
+    ],
     default: "pending",
   },
   order_items: [
@@ -138,7 +164,7 @@ const orderSchema = new mongoose.Schema({
 
 const validate = (order) => {
   const schema = Joi.object({
-    user_id: Joi.string().optional(),
+    user_id: Joi.string().allow(null).optional(),
     email: Joi.string().required(),
     shipping_address: Joi.object({
       first_name: Joi.string().required(),
@@ -146,29 +172,39 @@ const validate = (order) => {
       phone: Joi.string().required(),
       country: Joi.string().required(),
       city: Joi.string().required(),
-      appartement: Joi.string().optional(),
+      appartement: Joi.string().allow(null).optional(),
       address: Joi.string().required(),
-      zip: Joi.string().optional(),
+      zip: Joi.string().allow(null).optional(),
     }).required(),
     billing_address: Joi.object({
-      first_name: Joi.string().optional(),
-      last_name: Joi.string().optional(),
-      phone: Joi.string().optional(),
-      country: Joi.string().optional(),
-      city: Joi.string().optional(),
-      appartement: Joi.string().optional(),
-      address: Joi.string().optional(),
-      zip: Joi.string().optional(),
+      first_name: Joi.string().allow(null).optional(),
+      last_name: Joi.string().allow(null).optional(),
+      phone: Joi.string().allow(null).optional(),
+      country: Joi.string().allow(null).optional(),
+      city: Joi.string().allow(null).optional(),
+      appartement: Joi.string().allow(null).optional(),
+      address: Joi.string().allow(null).optional(),
+      zip: Joi.string().allow(null).optional(),
     }).optional(),
     shipping_billing_same_address: Joi.boolean().required(),
-    shipping_method: Joi.string().required(),
-    payment_method: Joi.string().required(),
-    coupon_code: Joi.string().optional(),
-    coupon_discount: Joi.number().optional(),
-    payment_status: Joi.string().valid("pending", "paid", "failed").required(),
-    shipping_status: Joi.string()
-      .valid("pending", "processing", "shipped", "delivered")
+    shipping_method: Joi.string().valid("standard", "express").required(),
+    payment_method: Joi.string()
+      .valid("cod", "card", "paypal", "bank transfer", "stripe")
       .required(),
+    coupon_code: Joi.string().allow(null).optional(),
+    coupon_discount: Joi.number().allow(null).optional(),
+    payment_status: Joi.string().valid("pending", "paid", "failed").optional(),
+    order_status: Joi.string()
+      .valid(
+        "pending",
+        "processing",
+        "shipped",
+        "delivered",
+        "cancelled",
+        "returned",
+        "refunded"
+      )
+      .optional(),
     order_items: Joi.array()
       .items(
         Joi.object({

@@ -1,4 +1,4 @@
-const authenticate = require("../middlewares/authenticate");
+const Authenticate = require("../middlewares/Authenticate");
 
 const router = require("express").Router();
 
@@ -10,8 +10,8 @@ const {
 } = require("../controllers/comment");
 
 router.get("/", GetCommentsByProduct);
-router.post("/", authenticate, AddComment);
-router.put("/:id", authenticate, UpdateComment);
-router.delete("/:id", authenticate, DeleteComment);
+router.post("/", Authenticate, AddComment);
+router.put("/:id", Authenticate, UpdateComment);
+router.delete("/:id", Authenticate, DeleteComment);
 
 module.exports = router;

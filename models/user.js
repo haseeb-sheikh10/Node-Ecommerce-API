@@ -13,16 +13,17 @@ const userSchema = new mongoose.Schema({
   phone_number: {
     type: String,
     required: false,
-    unique: true,
-    nullable: true,
-    blank: true,
+    index: {
+      unique: true,
+      partialFilterExpression: { phone_number: { $type: "string" } },
+    },
+    default: null,
   },
   address: {
     type: String,
     required: false,
     unique: false,
-    nullable: true,
-    blank: true,
+    default: null,
   },
   email: {
     type: String,
@@ -43,8 +44,8 @@ const validate = (user) => {
   const schema = Joi.object({
     first_name: Joi.string().required(),
     last_name: Joi.string().required(),
-    phone_number: Joi.string().optional(),
-    address: Joi.string().optional(),
+    phone_number: Joi.string().allow(null).optional(),
+    address: Joi.string().allow(null).optional(),
     email: Joi.string().email().required(),
     password: Joi.string().required(),
   });

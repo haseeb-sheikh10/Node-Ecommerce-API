@@ -5,6 +5,7 @@ const Joi = require("joi");
 const UserToken = require("../models/user-token");
 const sendEmail = require("../utils/sendEmail");
 const { SyncCarts } = require("../utils/SyncCarts");
+const AttachRole = require("../utils/AttachRole");
 
 const Login = async (req, res) => {
   try {
@@ -103,7 +104,9 @@ const Register = async (req, res) => {
     });
     await userToken.save();
 
-    await SyncCarts(user, req.query.cart_id, true);
+    await SyncCarts(newUser, req.query.cart_id, true);
+
+    await AttachRole(newUser);
 
     res.json({
       status: true,

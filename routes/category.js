@@ -1,4 +1,4 @@
-const authenticate = require("../middlewares/authenticate");
+const Authenticate = require("../middlewares/Authenticate");
 
 const router = require("express").Router();
 const {
@@ -8,11 +8,12 @@ const {
   UpdateCategory,
   DeleteCategory,
 } = require("../controllers/category");
+const { CheckAddRights, CheckEditRights, CheckDeleteRights } = require("../middlewares/CheckRights");
 
 router.get("/", GetCategories);
 router.get("/:id", GetCategoryById);
-router.post("/", authenticate, AddCategory);
-router.put("/:id", authenticate, UpdateCategory);
-router.delete("/:id", authenticate, DeleteCategory);
+router.post("/", Authenticate, CheckAddRights, AddCategory);
+router.put("/:id", Authenticate, CheckEditRights, UpdateCategory);
+router.delete("/:id", Authenticate, CheckDeleteRights, DeleteCategory);
 
 module.exports = router;
