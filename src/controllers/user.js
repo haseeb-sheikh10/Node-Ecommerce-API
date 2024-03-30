@@ -5,6 +5,7 @@ const DetachRole = require("../utils/DetachRole");
 const UpdateRoles = require("../utils/UpdateRoles");
 const bcrypt = require("bcryptjs");
 const { UserInRole } = require("../models/user-in-role");
+const RemoveFiles = require("../utils/RemoveFiles");
 
 const useValidation = (user) => {
   const schema = Joi.object({
@@ -89,6 +90,9 @@ const CreateUser = async (req, res) => {
         .status(400)
         .json({ status: false, message: "User already exist with this email" });
     }
+    if (req.file)
+      req.body.profile_picture = `${process.env.BASE_URL}${process.env.PORT}/${req.file.path}`;
+
     user = new User(req.body);
     const salt = await bcrypt.genSalt(10);
     user.password = await bcrypt.hash(req.body.password, salt);
@@ -114,6 +118,12 @@ const UpdateUser = async (req, res) => {
     if (!user) {
       return res.status(404).json({ status: false, message: "User not found" });
     }
+
+    if (req.file) {
+      await RemoveFiles(user.profile_picture, true);
+      user.profile_picture = `${process.env.BASE_URL}${process.env.PORT}/${req.file.path}`;
+    }
+
     const salt = await bcrypt.genSalt(10);
     user.password = await bcrypt.hash(req.body.password, salt);
     user.first_name = req.body.first_name;
@@ -137,7 +147,8 @@ const DeleteUser = async (req, res) => {
       return res.status(404).json({ status: false, message: "User not found" });
     }
     await DetachRole(user);
-    res.status(200).json({ status: true, message: "User deleted", data: user });
+    await RemoveFiles(user.profile_picture, true);
+    res.status(200).json({ status: true, message: "User deleted" });
   } catch (error) {
     res.status(500).json({ status: false, message: error.message });
   }

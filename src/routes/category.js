@@ -8,12 +8,29 @@ const {
   UpdateCategory,
   DeleteCategory,
 } = require("../controllers/category");
-const { CheckAddRights, CheckEditRights, CheckDeleteRights } = require("../middlewares/CheckRights");
+const {
+  CheckAddRights,
+  CheckEditRights,
+  CheckDeleteRights,
+} = require("../middlewares/CheckRights");
+const { upload } = require("../middlewares/Multer");
 
 router.get("/", GetCategories);
 router.get("/:id", GetCategoryById);
-router.post("/", Authenticate, CheckAddRights, AddCategory);
-router.put("/:id", Authenticate, CheckEditRights, UpdateCategory);
+router.post(
+  "/",
+  Authenticate,
+  CheckAddRights,
+  upload.single("image"),
+  AddCategory
+);
+router.put(
+  "/:id",
+  Authenticate,
+  CheckEditRights,
+  upload.single("image"),
+  UpdateCategory
+);
 router.delete("/:id", Authenticate, CheckDeleteRights, DeleteCategory);
 
 module.exports = router;

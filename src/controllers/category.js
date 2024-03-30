@@ -1,4 +1,6 @@
 const { Category, validate } = require("../models/category");
+const ProductCategoryRelation = require("../models/product-category");
+const RemoveFiles = require("../utils/RemoveFiles");
 
 const GetCategories = async (req, res) => {
   try {
@@ -49,9 +51,10 @@ const AddCategory = async (req, res) => {
         message: error.details[0].message,
       });
 
-    let category = new Category({
-      name: req.body.name,
-    });
+    if (req.file)
+      req.body.image = `${process.env.BASE_URL}${process.env.PORT}/${req.file.path}`;
+
+    let category = new Category(req.body);
     category = await category.save();
     return res.json({
       status: true,
@@ -72,18 +75,22 @@ const UpdateCategory = async (req, res) => {
         message: error.details[0].message,
       });
 
-    const category = await Category.findByIdAndUpdate(
-      req.params.id,
-      {
-        name: req.body.name,
-      },
-      { new: true }
-    );
+    let category = await Category.findById(req.params.id);
     if (!category)
       return res.status(404).json({
         status: false,
         message: "No category found",
       });
+
+    if (req.file) {
+      await RemoveFiles(category.image, true);
+      req.body.image = `${process.env.BASE_URL}${process.env.PORT}/${req.file.path}`;
+    }
+
+    category = await Category.findByIdAndUpdate(req.params.id, req.body, {
+      new: true,
+    });
+
     return res.json({
       status: true,
       message: "Category updated successfully",
@@ -96,16 +103,26 @@ const UpdateCategory = async (req, res) => {
 
 const DeleteCategory = async (req, res) => {
   try {
+    const relation = await ProductCategoryRelation.findOne({
+      category_id: req.params.id,
+    });
+
+    if (relation)
+      return res.status(400).json({
+        status: false,
+        message: "Category is in use by a product",
+      });
+
     const category = await Category.findByIdAndDelete(req.params.id);
     if (!category)
       return res.status(404).json({
         status: false,
         message: "No category found",
       });
+    await RemoveFiles(category.image, true);
     return res.json({
       status: true,
       message: "Category deleted successfully",
-      data: category,
     });
   } catch (error) {
     res.status(500).json({ message: error.message });

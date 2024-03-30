@@ -170,7 +170,7 @@ const ForgotPassword = async (req, res) => {
       }).save();
     }
 
-    const link = `${process.env.BASE_URL}${process.env.PORT}/api/auth/reset-password/${user._id}/${userToken.token}`;
+    const link = `${process.env.FRONTEND_URL}/auth/reset-password?user_id=${user._id}&token=${userToken.token}`;
     await sendEmail(user.email, "Password Reset", link);
     return res.json({
       status: true,

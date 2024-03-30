@@ -1,6 +1,7 @@
 const { Category } = require("../models/category");
 const { Product, validate } = require("../models/product");
 const ProductCategoryRelation = require("../models/product-category");
+const RemoveFiles = require("../utils/RemoveFiles");
 
 const GetProducts = async (req, res) => {
   try {
@@ -139,6 +140,7 @@ const AddProducts = async (req, res) => {
       );
       await ProductCategoryRelation.insertMany(productCategoryRelation);
     }
+    product.images = [];
     const result = await product.save();
     if (result) {
       return res.json({
@@ -223,14 +225,15 @@ const UpdateProducts = async (req, res) => {
 
 const DeleteProducts = async (req, res) => {
   try {
-    const product = await Product.findById(req.params.id);
+    const product = await Product.findByIdAndDelete(req.params.id);
     if (!product) {
       return res.status(404).json({
         status: false,
         message: "No product found",
       });
     }
-    await Product.findByIdAndDelete(req.params.id);
+    await RemoveFiles(product.images);
+    await ProductCategoryRelation.deleteMany({ product_id: product._id });
     return res.json({
       status: true,
       message: "record deleted successfully",
@@ -343,6 +346,47 @@ const GetBestSellerProducts = async (req, res) => {
   }
 };
 
+const UploadProductGallery = async (req, res) => {
+  try {
+    const product = await Product.findById(req.params.id);
+    if (!product) {
+      return res.status(404).json({
+        status: false,
+        message: "No product found",
+      });
+    }
+    if (!req.files) {
+      return res.status(400).json({
+        status: false,
+        message: "No images found",
+      });
+    }
+
+    await RemoveFiles(product.images);
+
+    const images = req.files?.map(
+      (file) => process.env.BASE_URL + process.env.PORT + "/" + file.path
+    );
+
+    product.images = images;
+    const result = await product.save();
+    if (result) {
+      return res.json({
+        status: true,
+        message: "Images Uploaded successfully",
+        data: result,
+      });
+    }
+    return res.status(400).json({
+      status: false,
+      message: "Images Upload failed",
+      data: result,
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
 module.exports = {
   GetProducts,
   GetProductsById,
@@ -353,4 +397,5 @@ module.exports = {
   GetFeaturedProducts,
   GetNewArrivalProducts,
   GetBestSellerProducts,
+  UploadProductGallery,
 };

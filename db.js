@@ -1,5 +1,5 @@
 const mongoose = require("mongoose");
-const SetDefaultUser = require("./utils/SetDefaultUser");
+const SetDefaultUser = require("./src/utils/SetDefaultUser");
 
 const connect = async () => {
   try {

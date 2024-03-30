@@ -10,10 +10,12 @@ const productSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
-  images: {
-    type: [String],
-    required: false,
-  },
+  images: [
+    {
+      type: String,
+      required: false,
+    },
+  ],
   price: {
     sale_price: {
       type: Number,
@@ -52,7 +54,6 @@ const validate = (product) => {
   const schema = Joi.object({
     name: Joi.string().required(),
     description: Joi.string().required(),
-    images: Joi.array().items(Joi.string()).optional(),
     price: Joi.object({
       sale_price: Joi.number().optional(),
       new_price: Joi.number().required(),

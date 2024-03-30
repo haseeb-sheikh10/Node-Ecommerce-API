@@ -2,6 +2,11 @@ const Joi = require("joi");
 const mongoose = require("mongoose");
 
 const userSchema = new mongoose.Schema({
+  profile_picture: {
+    type: String,
+    required: false,
+    default: null,
+  },
   first_name: {
     type: String,
     required: true,
